@@ -1,3 +1,4 @@
-Data/Gaussian_filtered/
 models/
 data/
+.vscode/
+__pycache__/
