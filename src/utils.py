@@ -1,4 +1,3 @@
-from sklearn.metrics import confusion_matrix
 import torch
 import os
 import pandas as pd
@@ -6,14 +5,11 @@ import numpy as np
 import matplotlib.pyplot as plt
 from torchvision.transforms import v2
 from PIL import Image
-from torch import nn
-import torchvision
 import seaborn as sns
-from zmq import device
 
 To_Tensor = v2.Compose([v2.ToImage(), v2.ToDtype(torch.float32, scale=True)])
 
-from constants import INPUT_SHAPE, BATCH_SIZE
+from src.constants import INPUT_SHAPE, BATCH_SIZE
 
 datagen = v2.Compose(
     [
@@ -69,13 +65,9 @@ def accuracy_fn(y_pred, y_true) -> float:
 
 
 def correct_sickness(y_pred, y_true) -> int:
-    correct = 0
-    for i in range(len(y_true)):
-        if y_true[i] == 0 and y_pred[i] == 0:
-            correct += 1
-        elif y_true[i] != 0 and y_pred[i] != 0:
-            correct += 1
-    return correct
+    correct_healthy = torch.sum((y_true == 0) & (y_pred == 0))
+    correct_unhealthy = torch.sum((y_true != 0) & (y_pred != 0))
+    return correct_healthy + correct_unhealthy
 
 
 def accuracy_sickness(y_pred, y_true) -> float:
@@ -108,7 +100,7 @@ def get_dataloader(
 def plot_confusion_matrix(cm: np.ndarray, classes: list):
     df_cm = pd.DataFrame(cm, index=classes, columns=classes)
 
-    plt.figure(figsize=(10, 7))
+    plt.figure(figsize=(6, 4))
     ax = sns.heatmap(df_cm, annot=True, fmt=".3f", cmap="Blues")
     ax.set(xlabel="Predicted Label", ylabel="True Label")
     plt.show()
@@ -126,20 +118,3 @@ def calculate_confusion_matrix(model, data_loader):
 
     confusion_matrix = confusion_matrix / confusion_matrix.sum(axis=1)[:, None]
     return confusion_matrix
-
-
-def get_accuracies(model, data_loader):
-    device = "cuda" if torch.cuda.is_available() else "cpu"
-    with torch.inference_mode():
-        total = 0
-        correct = 0
-        sickness_correct = 0
-        for data in data_loader:
-            images, y_true = data["image"].to(device), data["labels"].to(device)
-            outputs = model(images)
-
-            y_pred = torch.argmax(outputs, dim=1)
-            total += len(y_true)
-            correct += torch.sum(y_pred == y_true).item()
-            sickness_correct += correct_sickness(y_pred, y_true)
-    return correct / total, sickness_correct / total
