@@ -143,3 +143,15 @@ def get_accuracies(model, data_loader):
             correct += torch.sum(y_pred == y_true).item()
             sickness_correct += correct_sickness(y_pred, y_true)
     return correct / total, sickness_correct / total
+
+
+def sample_iid(df, frac, random_state=None, categories=[0, 1, 2, 3, 4]):
+    df_extra = []
+    for cat in categories:
+        df_sampled = df[df["level"] == cat]
+        if random_state is None:
+            df_sampled = df_sampled.sample(frac=frac)
+        else:
+            df_sampled = df_sampled.sample(frac=frac, random_state=random_state)
+        df_extra.append(df_sampled)
+    return pd.concat(df_extra)

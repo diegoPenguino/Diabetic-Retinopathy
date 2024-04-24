@@ -32,6 +32,10 @@ class Model_Retinopathy(nn.Module):
         self.accuracies = []
         self.total_accuracies = [0]
         self.validation_accuracies = [0]
+        self.control = {}
+        self.delta_control = {}
+        self.delta_y = {}
+        self.lr = LEARNING_RATE
 
     def forward(self, x):
         x = self.model(x)
@@ -170,7 +174,7 @@ def validate(model, data_loader):
 def train_loop(
     model, train_loader, val_loader, epochs=10, lr=LEARNING_RATE, verbose=True
 ):
-    optimizer = torch.optim.Adam(model.parameters(), lr=lr)
+    optimizer = torch.optim.SGD(model.parameters(), lr=lr)
     for epoch in range(epochs):
         train_step(model, train_loader, optimizer, verbose=verbose)
         validate(model, val_loader)
