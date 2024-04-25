@@ -13,7 +13,7 @@ loss_fn = nn.CrossEntropyLoss()
 
 
 class Model_Retinopathy(nn.Module):
-    def __init__(self, optimizer=torch.optim.SGD):
+    def __init__(self, optimizer_fn=torch.optim.SGD):
         super(Model_Retinopathy, self).__init__()
         # self.model = torchvision.models.resnet18(weights="DEFAULT")
         self.model = torchvision.models.vgg19(weights="DEFAULT")
@@ -27,7 +27,9 @@ class Model_Retinopathy(nn.Module):
             nn.Dropout(0.5),
             nn.Linear(128, 5),
         ) """
-        self.optimizer = optimizer(self.parameters(), lr=LEARNING_RATE)
+        self.lr = LEARNING_RATE
+        self.optimizer_fn = optimizer_fn
+        self.optimizer = self.optimizer_fn(self.parameters(), lr=self.lr)
         self.epochs_trained = 0
         self.losses = []
         self.marks = [0]
@@ -41,10 +43,14 @@ class Model_Retinopathy(nn.Module):
         x = self.model(x)
         return x
 
+    def update_lr(self, new_lr):
+        self.lr = new_lr
+        self.optimizer = self.optimizer_fn(self.parameters(), lr=self.lr)
+
     def unfreeze(self, percentage):
         for i, param in enumerate(self.parameters()):
-            if i > len(list(self.parameters())) * (1 - percentage):
-                param.requires_grad = True
+            condition = i > len(list(self.parameters())) * (1 - percentage)
+            param.requires_grad = condition
 
     def plot_loss(self):
         fig, ax = plt.subplots()
@@ -172,7 +178,7 @@ class Model_Retinopathy(nn.Module):
                 self.best_model = copy.deepcopy(self.model)
 
             if validation["accuracy"] < self.total_accuracies[-1] + 0.03:
-                self.set_weights(self.best_model.state_dict())
+                self.model = copy.deepcopy(self.best_model)
 
             if verbose:
                 print("VALIDATION: ", self.validate(val_loader))

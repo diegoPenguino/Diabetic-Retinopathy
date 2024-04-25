@@ -118,3 +118,10 @@ def calculate_confusion_matrix(model, data_loader):
 
     confusion_matrix = confusion_matrix / confusion_matrix.sum(axis=1)[:, None]
     return confusion_matrix
+
+
+def split_val(df, frac=0.05):
+    train_df = df.sample(frac=1.0 - frac)
+    val_df = df.drop(train_df.index).reset_index(drop=True)
+    train_df = train_df.reset_index(drop=True)
+    return train_df, val_df
