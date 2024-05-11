@@ -12,12 +12,12 @@ csv_file = f"data/Resized/train_{YEAR}.csv"
 optimizer_fn = torch.optim.Adam
 
 ## MODEL CONSTANTS
-EPOCHS = 4
+EPOCHS = 3
 UPDATES = 4
 BATCH_SIZE = 16
 LEARNING_RATE = 1e-5
 
-K_CLIENTS = 6
+K_CLIENTS = 10
 C = 1  # C: Fraction of clients to be selected
-rounds = 15  # T: Number of rounds
+rounds = 20  # T: Number of rounds
 clients = list(range(K_CLIENTS))

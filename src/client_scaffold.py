@@ -1,7 +1,7 @@
 import copy
 from src.constants import LEARNING_RATE
 from src.model import Model_Retinopathy
-from src.server import Server
+
 
 import torch
 import torch.nn as nn
@@ -17,9 +17,9 @@ class Client_Scaffold(Model_Retinopathy):
         self.delta_control = {}
         self.delta_y = {}
         for key, layer in self.model.named_parameters():
-            self.control[key] = torch.zeros_like(layer.data).to(device)
-            self.delta_control[key] = torch.zeros_like(layer.data).to(device)
-            self.delta_y[key] = torch.zeros_like(layer.data).to(device)
+            self.control[key] = torch.zeros_like(layer.data).to("cpu")
+            self.delta_control[key] = torch.zeros_like(layer.data).to("cpu")
+            self.delta_y[key] = torch.zeros_like(layer.data).to("cpu")
         self.server = server
         self.is_server = False
         self.val_accuracies = []
@@ -39,7 +39,7 @@ class Client_Scaffold(Model_Retinopathy):
     def train_loop(self, epochs):
         val = self.validate()
         self.append_val_metrics(val)
-        x_model = copy.deepcopy(self.model)
+        x_model = copy.deepcopy(self.model).to("cpu")
         x_control = copy.deepcopy(self.control)
 
         for epoch in range(epochs):
@@ -56,7 +56,7 @@ class Client_Scaffold(Model_Retinopathy):
                     self.server.control.values(),
                     self.control.values(),
                 ):
-                    param.grad += c.data - ci.data
+                    param.grad += c.data.to(device) - ci.data.to(device)
                 self.optimizer.step()
                 del inputs
                 del y_true
@@ -68,10 +68,10 @@ class Client_Scaffold(Model_Retinopathy):
 
         temp = {}
         for key, layer in self.model.named_parameters():
-            temp[key] = layer.data.clone()
+            temp[key] = layer.data.clone().to("cpu")
 
         for key, layer in x_model.named_parameters():
-            local_steps = epochs * len(self.train_loader)
+            local_steps = epochs * len(self.train_loader)  ## AAAAAAAAAAAAAAAAAAAAAAAA
             ## Maybe change for get_data_len()
             self.control[key] = (
                 self.control[key]
@@ -80,3 +80,6 @@ class Client_Scaffold(Model_Retinopathy):
             )
             self.delta_y[key] = temp[key] - layer.data
             self.delta_control[key] = self.control[key] - x_control[key]
+        for key, layer in self.model.named_parameters():
+            self.control[key] = torch.zeros_like(layer.data).to("cpu")
+            self.delta_control[key] = torch.zeros_like(layer.data).to("cpu")

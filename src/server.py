@@ -12,11 +12,15 @@ class Server(Model_Retinopathy):
         self.is_server = True
         self.n_clients = n_clients
         self.clients_id = list(range(n_clients))
-
+        self.title_plot = ""
         self.train_loader = None
 
     def plot_loss(self):  ## Change for old one
         fig, ax = plt.subplots()
+        for ind_client in self.clients_ind:
+            ind_client.plot_val_loss(ax)
+        for client in self.clients:
+            client.plot_loss(ax)
         ax.plot(
             self.marks,
             self.val_losses,
@@ -25,10 +29,6 @@ class Server(Model_Retinopathy):
             color="Blue",
             linewidth=5,
         )
-        for client in self.clients:
-            client.plot_loss(ax)
-        for ind_client in self.clients_ind:
-            ind_client.plot_val_loss(ax)
         ax.set_title("Loss over epochs")
         ax.set_xlabel("Epochs")
         ax.set_ylabel("Loss")
@@ -37,6 +37,10 @@ class Server(Model_Retinopathy):
 
     def plot_accuracy(self):
         fig, ax = plt.subplots()
+        for ind_client in self.clients_ind:
+            ind_client.plot_val_accuracy(ax)
+        for client in self.clients:
+            client.plot_accuracy(ax)
         ax.plot(
             self.marks,
             self.val_accuracies,
@@ -45,10 +49,6 @@ class Server(Model_Retinopathy):
             color="Blue",
             linewidth=5,
         )
-        for client in self.clients:
-            client.plot_accuracy(ax)
-        for ind_client in self.clients_ind:
-            ind_client.plot_val_accuracy(ax)
         ax.set_title("Accuracy over epochs")
         ax.set_xlabel("Epochs")
         ax.set_ylabel("Accuracy")
@@ -59,9 +59,9 @@ class Server(Model_Retinopathy):
         plt.ioff()
 
         ax = self.plot_loss()
-        plt.savefig("Losses_fed.png")
+        plt.savefig(f"Losses_{self.title_plot}.png")
         plt.close()
 
         ax = self.plot_accuracy()
-        plt.savefig("Accuracies_fed.png")
+        plt.savefig(f"Accuracies_{self.title_plot}.png")
         plt.close()

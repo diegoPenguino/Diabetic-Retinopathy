@@ -44,7 +44,7 @@ def get_vgg19():
 class Model_Retinopathy(nn.Module):
     def __init__(self, optimizer_fn, train_df, val_loader, lr=LEARNING_RATE):
         super(Model_Retinopathy, self).__init__()
-        self.model = get_resnet18()
+        self.model = get_resnet18().to(device)
         for param in self.model.parameters():
             param.requires_grad = True
 
