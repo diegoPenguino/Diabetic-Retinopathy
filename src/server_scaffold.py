@@ -22,10 +22,14 @@ class Server_Scaffold(Server):
         self.control = {}
         self.delta_control = {}
         self.delta_y = {}
+        self.val_accuracies = []
+        
+        weights = self.get_weights()
         for key, layer in self.model.named_parameters():
-            self.control[key] = torch.zeros_like(layer.data).to("cpu")
-            self.delta_control[key] = torch.zeros_like(layer.data).to("cpu")
-            self.delta_y[key] = torch.zeros_like(layer.data).to("cpu")
+            self.control[key] = torch.zeros_like(layer.data).float().to("cpu")
+            self.delta_control[key] = torch.zeros_like(layer.data).float().to("cpu")
+        for key, layer in weights.items():
+            self.delta_y[key] = torch.zeros_like(layer.data).float().to("cpu")
 
         train_df = split_for_federated(data_df, n_clients)
 
@@ -43,7 +47,7 @@ class Server_Scaffold(Server):
 
         self.title_plot = "SCAFFOLD"
 
-    def dispatch(self, clients_id):  # maybe change for .parameters() update
+    def dispatch(self, clients_id):
         for i in clients_id:
             self.clients[i].set_weights(self.get_weights())
 
@@ -64,35 +68,41 @@ class Server_Scaffold(Server):
 
     def aggregation(self, clients_id):
         s = sum([self.clients[i].get_data_len() for i in clients_id])
-        x = {}
-        c = {}
+        Dx = {}
+        Dc = {}
 
         for key, layer in self.clients[0].model.named_parameters():
-            x[key] = torch.zeros_like(layer.data).to("cpu")
-            c[key] = torch.zeros_like(layer.data).to("cpu")
+            Dc[key] = torch.zeros_like(layer.data).float().to("cpu")
+        for key, layer in self.get_weights().items():
+            Dx[key] = torch.zeros_like(layer.data).float().to("cpu")
 
         for id in clients_id:
-            for key, layer in self.clients[id].model.named_parameters():
-                x[key] += self.clients[id].delta_y[key] / len(clients_id)
-                c[key] += self.clients[id].delta_control[key] / len(clients_id)
-                if key == "fc.3.bias":
-                    print("DELTA Y")
-                    print(self.clients[id].delta_y[key])
+            actual_client = self.clients[id]
+            for key, layer in actual_client.model.named_parameters():
+                Dc[key] += (
+                    actual_client.delta_control[key] * actual_client.get_data_len() / s
+                )
+            for key, layer in self.get_weights().items():
+                Dx[key] += actual_client.delta_y[key] * actual_client.get_data_len() / s
 
         # update x and c
+        weights = {}
+        for key, layer in self.get_weights().items():
+            weights[key] = layer.data.clone().float().to("cpu")
+
         for key, layer in self.model.named_parameters():
-            layer.data += 1 * x[key].data.to(device)  # lr=1
-            if key == "fc.3.bias":
-                print("DELTA X")
-                print(x[key])
-                print("X")
-                print(layer.data)
-            self.control[key].data += c[key].data * (len(clients_id) / self.n_clients)
+            self.control[key].data += Dc[key].data * (len(clients_id) / self.n_clients)
+
+        for key, layer in self.get_weights().items():
+            weights[key] += 1 * Dx[key].data  # lr=1
+            weights[key] = weights[key].to(device)
+        self.set_weights(weights)
 
     def train_loop(self, rounds, epochs):
         m_clients = int(max(1, K_CLIENTS * C))
         acc, loss = self.validate().values()
         self.val_losses.append(loss)
+        self.val_accuracies.append(acc)
         print(f"GLOBAL Loss = {loss}, Acc = {acc}")
         for r in range(rounds):
             print(torch.cuda.memory_allocated() / (1024**2), "MB")

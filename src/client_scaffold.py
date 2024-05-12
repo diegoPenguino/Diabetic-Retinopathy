@@ -1,6 +1,7 @@
 import copy
 from src.constants import LEARNING_RATE
 from src.model import Model_Retinopathy
+from src.scaffold_optimizer import Scaffold_Optimizer
 
 
 import torch
@@ -16,13 +17,16 @@ class Client_Scaffold(Model_Retinopathy):
         self.control = {}
         self.delta_control = {}
         self.delta_y = {}
+        weights = self.get_weights()
         for key, layer in self.model.named_parameters():
-            self.control[key] = torch.zeros_like(layer.data).to("cpu")
-            self.delta_control[key] = torch.zeros_like(layer.data).to("cpu")
-            self.delta_y[key] = torch.zeros_like(layer.data).to("cpu")
+            self.control[key] = torch.zeros_like(layer.data).float().to("cpu")
+            self.delta_control[key] = torch.zeros_like(layer.data).float().to("cpu")
+        for key, layer in weights.items():
+            self.delta_y[key] = torch.zeros_like(layer.data).float().to("cpu")
         self.server = server
         self.is_server = False
         self.val_accuracies = []
+        self.optimizer = Scaffold_Optimizer(self.model.parameters(), lr=lr)
 
     def plot_loss(self, ax):
         marks, val_losses = zip(*self.val_losses)
@@ -40,7 +44,10 @@ class Client_Scaffold(Model_Retinopathy):
         val = self.validate()
         self.append_val_metrics(val)
         x_model = copy.deepcopy(self.model).to("cpu")
+        # x_weights = copy.deepcopy(self.model).to("cpu")
         x_control = copy.deepcopy(self.control)
+
+        self.optimizer = Scaffold_Optimizer(self.model.parameters(), lr=self.lr)
 
         for epoch in range(epochs):
             print(torch.cuda.memory_allocated() / (1024**2), "MB")
@@ -51,13 +58,15 @@ class Client_Scaffold(Model_Retinopathy):
                 outputs = self.model(inputs)
                 loss = loss_fn(outputs, y_true)
                 loss.backward()
-                for param, c, ci in zip(
+                """ for param, c, ci in zip(
                     self.model.parameters(),
                     self.server.control.values(),
                     self.control.values(),
                 ):
-                    param.grad += c.data.to(device) - ci.data.to(device)
-                self.optimizer.step()
+                    param.grad.data = (
+                        param.grad.data + c.data.to(device) - ci.data.to(device)
+                    ) """
+                self.optimizer.step(self.server.control, self.control)
                 del inputs
                 del y_true
                 torch.cuda.empty_cache()
@@ -67,19 +76,17 @@ class Client_Scaffold(Model_Retinopathy):
             print(f"Epoch {epoch}: Loss: {val['loss']}, Accuracy: {val['accuracy']}")
 
         temp = {}
-        for key, layer in self.model.named_parameters():
-            temp[key] = layer.data.clone().to("cpu")
+        weights = self.get_weights()
+        for key, layer in weights.items():
+            temp[key] = layer.data.clone().float().to("cpu")
 
-        for key, layer in x_model.named_parameters():
-            local_steps = epochs * len(self.train_loader)  ## AAAAAAAAAAAAAAAAAAAAAAAA
-            ## Maybe change for get_data_len()
-            self.control[key] = (
-                self.control[key]
-                - self.server.control[key]
-                + (layer.data - temp[key]) / (local_steps * self.lr)
-            )
+        local_steps = epochs * len(self.train_loader)
+        for key, layer in x_model.state_dict().items():
             self.delta_y[key] = temp[key] - layer.data
-            self.delta_control[key] = self.control[key] - x_control[key]
-        for key, layer in self.model.named_parameters():
-            self.control[key] = torch.zeros_like(layer.data).to("cpu")
-            self.delta_control[key] = torch.zeros_like(layer.data).to("cpu")
+            if key in dict(x_model.named_parameters()).keys():
+                self.control[key] = (
+                    self.control[key]
+                    - self.server.control[key]
+                    + (layer.data - temp[key]) / (local_steps * self.lr)
+                )
+                self.delta_control[key] = self.control[key] - x_control[key]
