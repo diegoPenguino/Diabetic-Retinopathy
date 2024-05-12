@@ -1,9 +1,11 @@
 # Diabetic Retinopathy
- RESULTS FedAVG:
+### RESULTS FedAVG:
  
  ![Losses FedAVG](Losses_FedAVG.png)
 
  ![Accuracies FedAVG](Accuracies_FedAVG.png)
+
+### RESULTS SCAFFOLD
 
  ![Losses SCAFFOLD](Losses_SCAFFOLD.png)
 
