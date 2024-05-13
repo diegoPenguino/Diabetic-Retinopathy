@@ -44,10 +44,7 @@ class Client_Scaffold(Model_Retinopathy):
         val = self.validate()
         self.append_val_metrics(val)
         x_model = copy.deepcopy(self.model).to("cpu")
-        # x_weights = copy.deepcopy(self.model).to("cpu")
         x_control = copy.deepcopy(self.control)
-
-        self.optimizer = Scaffold_Optimizer(self.model.parameters(), lr=self.lr)
 
         for epoch in range(epochs):
             print(torch.cuda.memory_allocated() / (1024**2), "MB")
@@ -58,14 +55,6 @@ class Client_Scaffold(Model_Retinopathy):
                 outputs = self.model(inputs)
                 loss = loss_fn(outputs, y_true)
                 loss.backward()
-                """ for param, c, ci in zip(
-                    self.model.parameters(),
-                    self.server.control.values(),
-                    self.control.values(),
-                ):
-                    param.grad.data = (
-                        param.grad.data + c.data.to(device) - ci.data.to(device)
-                    ) """
                 self.optimizer.step(self.server.control, self.control)
                 del inputs
                 del y_true
@@ -90,3 +79,5 @@ class Client_Scaffold(Model_Retinopathy):
                     + (layer.data - temp[key]) / (local_steps * self.lr)
                 )
                 self.delta_control[key] = self.control[key] - x_control[key]
+
+        self.model.zero_grad()

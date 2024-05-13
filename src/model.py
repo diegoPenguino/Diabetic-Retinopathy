@@ -217,6 +217,7 @@ class Model_Retinopathy(nn.Module):
                 print("VALIDATION: ", val)
         if verbose:
             print("Training Finished")
+        self.model.zero_grad()
 
     def append_val_metrics(self, val):
         self.val_losses.append(val["loss"])

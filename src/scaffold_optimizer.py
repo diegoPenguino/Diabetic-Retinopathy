@@ -21,7 +21,6 @@ class Scaffold_Optimizer(Optimizer):
             ):
                 if p.grad is None:
                     continue
-                ## IMPLEMENT ADAM TO THIS CRAP
                 dp = p.grad.data + c.data.to(device) - ci.data.to(device)
                 p.data = p.data - dp.data * group["lr"]
 

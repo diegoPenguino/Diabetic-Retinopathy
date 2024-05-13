@@ -22,8 +22,7 @@ class Server_Scaffold(Server):
         self.control = {}
         self.delta_control = {}
         self.delta_y = {}
-        self.val_accuracies = []
-        
+
         weights = self.get_weights()
         for key, layer in self.model.named_parameters():
             self.control[key] = torch.zeros_like(layer.data).float().to("cpu")
@@ -100,10 +99,11 @@ class Server_Scaffold(Server):
 
     def train_loop(self, rounds, epochs):
         m_clients = int(max(1, K_CLIENTS * C))
-        acc, loss = self.validate().values()
-        self.val_losses.append(loss)
-        self.val_accuracies.append(acc)
-        print(f"GLOBAL Loss = {loss}, Acc = {acc}")
+        if len(self.val_losses) == 0:
+            acc, loss = self.validate().values()
+            self.val_losses.append(loss)
+            self.val_accuracies.append(acc)
+            print(f"GLOBAL Loss = {loss}, Acc = {acc}")
         for r in range(rounds):
             print(torch.cuda.memory_allocated() / (1024**2), "MB")
             print(f"Round {r}\n{dash*50}")

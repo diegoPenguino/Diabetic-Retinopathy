@@ -39,13 +39,6 @@ class Client_FedAVG(Model_Retinopathy):
                 outputs = self.model(inputs)
                 loss = loss_fn(outputs, y_true)
                 loss.backward()
-                c = 0
-                for _, xd in self.get_weights().items():
-                    if xd.requires_grad:
-                        print(xd.grad)
-                    else:
-                        c += 1
-                print(f"{c=}")
                 self.optimizer.step()
             self.epochs_trained += 1
             val = self.validate()

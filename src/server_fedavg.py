@@ -66,9 +66,11 @@ class Server_FedAVG(Server):
 
     def train_loop(self, rounds, epochs):
         m_clients = int(max(1, K_CLIENTS * C))
-        acc, loss = self.validate().values()
-        self.val_losses.append(loss)
-        print(f"GLOBAL Loss = {loss}, Acc = {acc}")
+        if len(self.val_losses) == 0:
+            acc, loss = self.validate().values()
+            self.val_losses.append(loss)
+            self.val_accuracies.append(acc)
+            print(f"GLOBAL Loss = {loss}, Acc = {acc}")
         for r in range(rounds):
             print(f"Round {r}\n{dash*50}")
             selected_clients = np.random.choice(
@@ -87,4 +89,4 @@ class Server_FedAVG(Server):
             print(f"GLOBAL Loss = {loss}, Acc = {acc}")
             self.save_plots()
             gpu_memory = torch.cuda.memory_allocated()
-            print(gpu_memory, "MB used")
+            print(gpu_memory / (1024**2), "MB used")

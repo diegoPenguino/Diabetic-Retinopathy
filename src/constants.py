@@ -17,7 +17,7 @@ UPDATES = 4
 BATCH_SIZE = 16
 LEARNING_RATE = 1e-3
 
-K_CLIENTS = 10
+K_CLIENTS = 40
 C = 1  # C: Fraction of clients to be selected
-rounds = 20  # T: Number of rounds
+rounds = 30  # T: Number of rounds
 clients = list(range(K_CLIENTS))

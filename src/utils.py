@@ -154,9 +154,9 @@ def sample_iid(df, frac, random_state=None, categories=[0, 1, 2, 3, 4]):
 
 
 def split_val(df, frac=0.05):
-    train_df = df.sample(frac=1.0 - frac)
-    val_df = df.drop(train_df.index).reset_index(drop=True)
-    train_df = train_df.reset_index(drop=True)
+    val_df = sample_iid(df, frac)
+    train_df = df.drop(val_df.index).reset_index(drop=True)
+    val_df = val_df.reset_index(drop=True)
     return train_df, val_df
 
 

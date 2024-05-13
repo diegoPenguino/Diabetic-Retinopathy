@@ -7,7 +7,7 @@ class Server(Model_Retinopathy):
     def __init__(self, n_clients, optimizer_fn, train_df, val_loader, lr=LEARNING_RATE):
         super(Server, self).__init__(optimizer_fn, train_df, val_loader, lr)
         self.marks = [0]
-        self.val_accuracies = [0]
+        self.val_accuracies = []
         self.val_losses = []
         self.is_server = True
         self.n_clients = n_clients
@@ -29,7 +29,7 @@ class Server(Model_Retinopathy):
             color="Blue",
             linewidth=5,
         )
-        ax.set_title("Loss over epochs")
+        ax.set_title(f"Loss over epochs, {self.n_clients} clients")
         ax.set_xlabel("Epochs")
         ax.set_ylabel("Loss")
         ax.legend()
@@ -49,7 +49,7 @@ class Server(Model_Retinopathy):
             color="Blue",
             linewidth=5,
         )
-        ax.set_title("Accuracy over epochs")
+        ax.set_title(f"Accuracy over epochs, {self.n_clients} clients")
         ax.set_xlabel("Epochs")
         ax.set_ylabel("Accuracy")
         ax.legend()
@@ -59,9 +59,9 @@ class Server(Model_Retinopathy):
         plt.ioff()
 
         ax = self.plot_loss()
-        plt.savefig(f"Losses_{self.title_plot}.png")
+        plt.savefig(f"Losses_{self.title_plot}_{self.n_clients}_clients.png")
         plt.close()
 
         ax = self.plot_accuracy()
-        plt.savefig(f"Accuracies_{self.title_plot}.png")
+        plt.savefig(f"Accuracies_{self.title_plot}_{self.n_clients}_clients.png")
         plt.close()
