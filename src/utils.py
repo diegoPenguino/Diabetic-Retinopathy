@@ -13,7 +13,7 @@ from zmq import device
 
 To_Tensor = v2.Compose([v2.ToImage(), v2.ToDtype(torch.float32, scale=True)])
 
-from constants import INPUT_SHAPE, BATCH_SIZE
+from src.constants import INPUT_SHAPE, BATCH_SIZE
 
 datagen = v2.Compose(
     [
@@ -69,13 +69,9 @@ def accuracy_fn(y_pred, y_true) -> float:
 
 
 def correct_sickness(y_pred, y_true) -> int:
-    correct = 0
-    for i in range(len(y_true)):
-        if y_true[i] == 0 and y_pred[i] == 0:
-            correct += 1
-        elif y_true[i] != 0 and y_pred[i] != 0:
-            correct += 1
-    return correct
+    correct_healthy = torch.sum((y_true == 0) & (y_pred == 0))
+    correct_unhealthy = torch.sum((y_true != 0) & (y_pred != 0))
+    return correct_healthy + correct_unhealthy
 
 
 def accuracy_sickness(y_pred, y_true) -> float:
@@ -143,3 +139,44 @@ def get_accuracies(model, data_loader):
             correct += torch.sum(y_pred == y_true).item()
             sickness_correct += correct_sickness(y_pred, y_true)
     return correct / total, sickness_correct / total
+
+
+def sample_iid(df, frac, random_state=None, categories=[0, 1, 2, 3, 4]):
+    df_extra = []
+    for cat in categories:
+        df_sampled = df[df["level"] == cat]
+        if random_state is None:
+            df_sampled = df_sampled.sample(frac=frac)
+        else:
+            df_sampled = df_sampled.sample(frac=frac, random_state=random_state)
+        df_extra.append(df_sampled)
+    return pd.concat(df_extra)
+
+
+def split_val(df, frac=0.05):
+    val_df = sample_iid(df, frac)
+    train_df = df.drop(val_df.index).reset_index(drop=True)
+    val_df = val_df.reset_index(drop=True)
+    return train_df, val_df
+
+
+def split_for_federated(df, n_clients):
+    samples = df.shape[0] // n_clients
+    train_df = []
+
+    while len(train_df) < n_clients - 1:
+        df_sample = df.sample(n=samples)
+        df.drop(df_sample.index, inplace=True)
+        train_df.append(df_sample.reset_index(drop=True))
+    train_df.append(df.reset_index(drop=True))
+
+    return train_df
+
+
+def get_loaders_fed(train_df, ext, directory, batch_size):
+    datasets, loaders = [], []
+    for small_df in train_df:
+        dataset, loader = get_dataloader(small_df, ext, directory, batch_size)
+        datasets.append(dataset)
+        loaders.append(loader)
+    return datasets, loaders
