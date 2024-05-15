@@ -20,9 +20,28 @@ def freeze_model(model):
         param.requires_grad = False
 
 
+def get_non_pretrained():
+    model = nn.Sequential(
+        nn.Conv2d(in_channels=INPUT_SHAPE[2], out_channels=32, kernel_size=3),
+        nn.ReLU(),
+        nn.MaxPool2d(kernel_size=2),
+        nn.Conv2d(in_channels=32, out_channels=64, kernel_size=3),
+        nn.ReLU(),
+        nn.MaxPool2d(kernel_size=2),
+        nn.Conv2d(in_channels=64, out_channels=128, kernel_size=3),
+        nn.ReLU(),
+        nn.MaxPool2d(kernel_size=2),
+        nn.Flatten(),
+        nn.Linear(128, 128),
+        nn.ReLU(),
+        nn.Dropout(0.5),
+        nn.Linear(128, 5),
+    )
+    return model
+
+
 def get_resnet18():
     model = torchvision.models.resnet18(weights="DEFAULT")
-    freeze_model(model)
 
     n_features = model.fc.in_features
     model.fc = nn.Sequential(
@@ -31,6 +50,8 @@ def get_resnet18():
         nn.Dropout(0.5),
         nn.Linear(128, 5),
     )
+    for param in model.parameters():
+        param.requires_grad = True
     return model
 
 
@@ -45,8 +66,6 @@ class Model_Retinopathy(nn.Module):
     def __init__(self, optimizer_fn, train_df, val_loader, lr=LEARNING_RATE):
         super(Model_Retinopathy, self).__init__()
         self.model = get_resnet18().to(device)
-        for param in self.model.parameters():
-            param.requires_grad = True
 
         ##FIX when using parameters(), to only use the ones which have requires_grad = True
         self.lr = lr
