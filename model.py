@@ -40,10 +40,11 @@ def get_non_pretrained():
         nn.ReLU(),
         nn.MaxPool2d(kernel_size=2),
         nn.Flatten(),
-        nn.Linear(26 * 26 * 128, 1024),
+        nn.Dropout(0.3),
+        nn.Linear(26 * 26 * 128, 128),
         nn.ReLU(),
         nn.Dropout(0.5),
-        nn.Linear(1024, 5),
+        nn.Linear(128, 5),
     )
     return model
 

@@ -207,7 +207,7 @@ class Server(Model_Retinopathy):
             print(val, file=f)
             print("\n", file=f)
             if just_converge:
-                return # No need to print individual clients results
+                return # No need to print independent clients results
             print("Independent clients results:", file=f)
             for i, client in enumerate(self.clients_ind):
                 val = client.validate()

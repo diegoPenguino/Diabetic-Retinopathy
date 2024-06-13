@@ -11,7 +11,7 @@ from src.utils import (
     split_non_iid,
 )
 
-from src.constants import K_CLIENTS, C
+from src.constants import K_CLIENTS, C, just_converge, iid
 
 import torch
 
@@ -36,12 +36,12 @@ class Server_Scaffold(Server):
         for key, layer in weights.items():
             self.delta_y[key] = torch.zeros_like(layer.data).float().to("cpu")
 
-        train_df = split_for_federated(data_df, n_clients)
-        # FOR NON IID:
-        # train_df = split_non_iid(data_df)
-        # self.n_clients = len(train_df)
-        # self.clients_id = list(range(self.n_clients))
-        ## UNTIL HERE
+        if iid:
+            train_df = split_for_federated(data_df, n_clients)
+        else:  # FOR NON IID:
+            train_df = split_non_iid(data_df)
+            self.n_clients = len(train_df)
+            self.clients_id = list(range(self.n_clients))
 
         self.clients = [
             Client_Scaffold(self, optimizer_fn, data, val_loader, lr)
@@ -115,7 +115,6 @@ class Server_Scaffold(Server):
             self.append_val_metrics(val)
             print(f"GLOBAL: {val}")
         rounds_taken = None
-        just_converge = False
         for r in range(rounds):
             print(torch.cuda.memory_allocated() / (1024**2), "MB")
             print(f"Round {r}\n{dash*50}")
@@ -139,7 +138,7 @@ class Server_Scaffold(Server):
             f1 = val["f1"]
             if not just_converge:
                 self.save_plots()
-            elif acc > 0.7 and recall > 0.9 and precision > 0.9 and f1 > 0.9:
+            elif acc > 0.7 and recall > 0.90 and precision > 0.9 and f1 > 0.9:
                 print(f"DONE in {rounds_taken} rounds")
                 break
             print(torch.cuda.memory_allocated() / (1024**2), "MB")

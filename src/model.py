@@ -7,6 +7,7 @@ import numpy as np
 
 from src.constants import INPUT_SHAPE, BATCH_SIZE, LEARNING_RATE, UPDATES
 from src.constants import ext, directory
+from src.constants import model_arch
 
 from src.utils import (
     accuracy_fn,
@@ -40,11 +41,11 @@ def get_non_pretrained():
         nn.ReLU(),
         nn.MaxPool2d(kernel_size=2),
         nn.Flatten(),
-        nn.Linear(36864, 1024),
+        nn.Linear(26 * 26 * 128, 128),
         nn.ReLU(),
         nn.Dropout(0.5),
-        nn.Linear(1024, 5),
-    )   
+        nn.Linear(128, 5),
+    )
     return model
 
 
@@ -73,10 +74,10 @@ def get_vgg19():
 class Model_Retinopathy(nn.Module):
     def __init__(self, optimizer_fn, train_df, val_loader, lr=LEARNING_RATE):
         super(Model_Retinopathy, self).__init__()
-        self.model = get_resnet18().to(device)
-
-        # self.model = get_non_pretrained().to(device)
-
+        if model_arch == "CNN":
+            self.model = get_non_pretrained().to(device)
+        else:
+            self.model = get_resnet18().to(device)
         ##FIX when using parameters(), to only use the ones which have requires_grad = True
         self.lr = lr
         self.optimizer_fn = optimizer_fn
