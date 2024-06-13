@@ -12,12 +12,14 @@ csv_file = f"data/Resized/train_{YEAR}.csv"
 optimizer_fn = torch.optim.SGD
 
 ## MODEL CONSTANTS
-EPOCHS = 3
+EPOCHS = 5
 UPDATES = 4
 BATCH_SIZE = 16
 LEARNING_RATE = 1e-3
 
-K_CLIENTS = 40
-C = 1  # C: Fraction of clients to be selected
-rounds = 30  # T: Number of rounds
+K_CLIENTS = 30
+C = 1.0  # C: Fraction of clients to be selected
+rounds = 50  # T: Number of rounds
 clients = list(range(K_CLIENTS))
+
+plot_title = f"{K_CLIENTS} clients"

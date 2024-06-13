@@ -9,7 +9,7 @@ from PIL import Image
 from torch import nn
 import torchvision
 import seaborn as sns
-from zmq import device
+import random
 
 To_Tensor = v2.Compose([v2.ToImage(), v2.ToDtype(torch.float32, scale=True)])
 
@@ -74,8 +74,26 @@ def correct_sickness(y_pred, y_true) -> int:
     return correct_healthy + correct_unhealthy
 
 
-def accuracy_sickness(y_pred, y_true) -> float:
-    return correct_sickness(y_pred, y_true) / len(y_true)
+def accuracy_sickness(tp, tn, fp, fn) -> float:
+    return (tp + tn) / (tp + tn + fp + fn)
+
+
+def recall(tp, fn) -> float:
+    if tp + fn == 0:
+        return 0
+    return tp / (tp + fn)
+
+
+def precision(tp, fp) -> float:
+    if tp + fp == 0:
+        return 0
+    return tp / (tp + fp)
+
+
+def f1_score(precision, recall) -> float:
+    if precision + recall == 0:
+        return 0
+    return 2 * (precision * recall) / (precision + recall)
 
 
 def plot_samples(data: Dataset_Diabetic, height: int, width: int):
@@ -124,6 +142,23 @@ def calculate_confusion_matrix(model, data_loader):
     return confusion_matrix
 
 
+def calculate_confusion_binary(model, data_loader):
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    confusion_matrix = np.zeros((2, 2), dtype=float)
+    with torch.inference_mode():
+        for data in data_loader:
+            images, true_y = data["image"].to(device), data["labels"].to(device)
+            outputs = model(images)
+            pred_y = torch.argmax(outputs, dim=1)
+            pred_y = (pred_y > 0).int()
+            true_y = (true_y > 0).int()
+            for i in range(len(true_y)):
+                confusion_matrix[true_y[i], pred_y[i]] += 1
+
+    confusion_matrix = confusion_matrix / confusion_matrix.sum(axis=1)[:, None]
+    return confusion_matrix
+
+
 def get_accuracies(model, data_loader):
     device = "cuda" if torch.cuda.is_available() else "cpu"
     with torch.inference_mode():
@@ -141,7 +176,7 @@ def get_accuracies(model, data_loader):
     return correct / total, sickness_correct / total
 
 
-def sample_iid(df, frac, random_state=None, categories=[0, 1, 2, 3, 4]):
+def sample_iid(df, frac, random_state=None, categories=(0, 1, 2, 3, 4)):
     df_extra = []
     for cat in categories:
         df_sampled = df[df["level"] == cat]
@@ -170,6 +205,26 @@ def split_for_federated(df, n_clients):
         train_df.append(df_sample.reset_index(drop=True))
     train_df.append(df.reset_index(drop=True))
 
+    return train_df
+
+
+## subsplits = 10, 2, 5, 1, 2
+def split_non_iid(df, categories=(0, 1, 2, 3, 4), subsplits=(20, 4, 10, 2, 4)):
+    healthy, sick = [], []
+    for sub, cat in zip(subsplits, categories):
+        df_sampled = df[df["level"] == cat].copy()
+        aux = split_for_federated(df_sampled, sub)
+        if cat == 0:
+            healthy.extend(aux)
+        else:
+            sick.extend(aux)
+    assert len(healthy) == len(sick)
+    random.shuffle(healthy)
+    random.shuffle(sick)
+    train_df = []
+    for h, s in zip(healthy, sick):
+        train_df.append(pd.concat([h, s]).reset_index(drop=True))
+    assert len(train_df) == len(sick)
     return train_df
 
 

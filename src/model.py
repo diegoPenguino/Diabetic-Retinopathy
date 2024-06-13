@@ -8,7 +8,15 @@ import numpy as np
 from src.constants import INPUT_SHAPE, BATCH_SIZE, LEARNING_RATE, UPDATES
 from src.constants import ext, directory
 
-from src.utils import accuracy_fn, accuracy_sickness, get_dataloader, split_val
+from src.utils import (
+    accuracy_fn,
+    accuracy_sickness,
+    get_dataloader,
+    split_val,
+    recall,
+    precision,
+    f1_score,
+)
 
 loss_fn = nn.CrossEntropyLoss()
 
@@ -32,11 +40,11 @@ def get_non_pretrained():
         nn.ReLU(),
         nn.MaxPool2d(kernel_size=2),
         nn.Flatten(),
-        nn.Linear(128, 128),
+        nn.Linear(36864, 1024),
         nn.ReLU(),
         nn.Dropout(0.5),
-        nn.Linear(128, 5),
-    )
+        nn.Linear(1024, 5),
+    )   
     return model
 
 
@@ -67,6 +75,8 @@ class Model_Retinopathy(nn.Module):
         super(Model_Retinopathy, self).__init__()
         self.model = get_resnet18().to(device)
 
+        # self.model = get_non_pretrained().to(device)
+
         ##FIX when using parameters(), to only use the ones which have requires_grad = True
         self.lr = lr
         self.optimizer_fn = optimizer_fn
@@ -79,9 +89,13 @@ class Model_Retinopathy(nn.Module):
         self.accuracies = []
         self.total_accuracies = [0]
 
-        self.marks = [0]
-        self.val_accuracies = [0]
+        self.marks = []
+        self.val_accuracies = []
+        self.val_recall = []
+        self.val_precision = []
+        self.val_f1 = []
         self.val_losses = []
+        self.val_bin_accuracy = []
 
     def set_weights(self, weights):
         self.model.load_state_dict(weights)
@@ -140,11 +154,77 @@ class Model_Retinopathy(nn.Module):
         plt.savefig("Accuracies.png")
         plt.close()
 
-    def plot_val_loss(self, ax):
+    def plot_val_loss(self, ax, add_label=False):
+        if add_label:
+            ax.plot(
+                self.marks,
+                self.val_losses,
+                linestyle="-",
+                color="red",
+                label="Ind. Clients",
+            )
+            return
         ax.plot(self.marks, self.val_losses, linestyle="-", color="red")
 
-    def plot_val_accuracy(self, ax):
+    def plot_val_accuracy(self, ax, add_label=False):
+        if add_label:
+            ax.plot(
+                self.marks,
+                self.val_accuracies,
+                linestyle="-",
+                color="red",
+                label="Ind. Clients",
+            )
+            return
         ax.plot(self.marks, self.val_accuracies, linestyle="-", color="red")
+
+    def plot_val_recall(self, ax, add_label=False):
+        if add_label:
+            ax.plot(
+                self.marks,
+                self.val_recall,
+                linestyle="-",
+                color="red",
+                label="Ind. Clients",
+            )
+            return
+        ax.plot(self.marks, self.val_recall, linestyle="-", color="red")
+
+    def plot_val_precision(self, ax, add_label=False):
+        if add_label:
+            ax.plot(
+                self.marks,
+                self.val_precision,
+                linestyle="-",
+                color="red",
+                label="Ind. Clients",
+            )
+            return
+        ax.plot(self.marks, self.val_precision, linestyle="-", color="red")
+
+    def plot_val_f1(self, ax, add_label=False):
+        if add_label:
+            ax.plot(
+                self.marks,
+                self.val_f1,
+                linestyle="-",
+                color="red",
+                label="Ind. Clients",
+            )
+            return
+        ax.plot(self.marks, self.val_f1, linestyle="-", color="red")
+
+    def plot_val_bin_accuracy(self, ax, add_label=False):
+        if add_label:
+            ax.plot(
+                self.marks,
+                self.val_bin_accuracy,
+                linestyle="-",
+                color="red",
+                label="Ind. Clients",
+            )
+            return
+        ax.plot(self.marks, self.val_bin_accuracy, linestyle="-", color="red")
 
     def check_loader(self, loader):
         if loader is None:
@@ -155,37 +235,41 @@ class Model_Retinopathy(nn.Module):
             loader = self.val_loader
         return loader
 
-    def get_loss(self, loader=None):
-        loader = self.check_loader(loader)
-
+    def validate(self, loader=None):
+        if loader is None:
+            loader = self.val_loader
         self.model.eval()
+        tn = 0
+        tp = 0
+        fn = 0
+        fp = 0
         loss = 0
-        with torch.inference_mode():
-            for batch in loader:
-                inputs, y_true = batch["image"].to(device), batch["labels"].to(device)
-                outputs = self(inputs)
-                loss += loss_fn(outputs, y_true).item()
-        return loss / len(loader)
-
-    def get_accuracy(self, loader=None):
-        loader = self.check_loader(loader)
-        self.model.eval()
-        correct_pred = 0
+        correct = 0
         with torch.inference_mode():
             for batch in loader:
                 inputs, y_true = batch["image"].to(device), batch["labels"].to(device)
                 outputs = self(inputs)
                 y_pred = torch.argmax(outputs, dim=1)
-                correct_pred += torch.sum(y_pred == y_true).item()
-        return correct_pred / len(loader.dataset)
+                tn += torch.sum((y_pred == 0) & (y_true == 0)).item()
+                tp += torch.sum((y_pred != 0) & (y_true != 0)).item()
+                fn += torch.sum((y_pred == 0) & (y_true != 0)).item()
+                fp += torch.sum((y_pred != 0) & (y_true == 0)).item()
+                loss += loss_fn(outputs, y_true).item()
+                correct += torch.sum(y_pred == y_true).item()
+        recall_score = recall(tp, fn)
+        precision_score = precision(tp, fp)
+        f1 = f1_score(precision_score, recall_score)
+        accuracy = correct / len(loader.dataset)
+        return {
+            "loss": float("%.4f" % (loss / len(loader))),
+            "accuracy": float("%.4f" % (accuracy)),
+            "f1": float("%.4f" % (f1)),
+            "accuracy_binary": float("%.4f" % (accuracy_sickness(tp, tn, fp, fn))),
+            "recall": float("%.4f" % (recall_score)),
+            "precision": float("%.4f" % (precision_score)),
+        }
 
-    def validate(self, loader=None):
-        val_loss = self.get_loss(loader)
-        val_accuracy = self.get_accuracy(loader)
-        return {"accuracy": val_accuracy, "loss": val_loss}
-
-    def train_step(self, update_every=4, verbose=True):
-        update_every = len(self.train_loader) // UPDATES
+    def train_step(self, verbose=True):
 
         self.model.train()
         correct_pred = 0
@@ -209,26 +293,19 @@ class Model_Retinopathy(nn.Module):
 
             self.losses.append(loss)
             self.accuracies.append(accuracy)
-            if verbose is None:
-                print(
-                    f"Batch #{i}: Loss: {loss: .5f} Accuracy: {accuracy: .4f}",
-                    end="\r",
-                )
-
-                if i % update_every == 0:
-                    print(f"Batch #{i}: Loss: {loss: .5f} Accuracy: {accuracy: .4f}")
 
         self.total_accuracies.append(correct_pred / len(self.train_loader.dataset))
         self.epochs_trained += 1
-        self.marks.append(self.epochs_trained)
 
     def train_loop(self, epochs, verbose=True):
         if self.epochs_trained == 0:
-            self.val_losses.append(self.get_loss())
+            val = self.validate()
+            self.append_val_metrics(val)
+            if verbose:
+                print("VALIDATION: ", val)
         for _ in range(epochs):
             self.train_step(verbose=verbose)
             val = self.validate()
-            acc = val["accuracy"]
             self.append_val_metrics(val)
             # self.save_plots()
 
@@ -239,11 +316,19 @@ class Model_Retinopathy(nn.Module):
         self.model.zero_grad()
 
     def append_val_metrics(self, val):
+        self.marks.append(self.epochs_trained)
         self.val_losses.append(val["loss"])
         self.val_accuracies.append(val["accuracy"])
+        self.val_recall.append(val["recall"])
+        self.val_precision.append(val["precision"])
+        self.val_f1.append(val["f1"])
+        self.val_bin_accuracy.append(val["accuracy_binary"])
 
     def get_data_len(self):
         return len(self.train_loader.dataset)
+
+    def get_val_losses(self):
+        return self.val_losses
 
 
 def get_smooth_losses(losses: list):

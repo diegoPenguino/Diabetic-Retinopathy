@@ -1,5 +1,15 @@
 models/
-data/
+Gaussian_filtered/
+data/Resized/non_organized_2015
+data/Resized/non_organized_2019
+data/Resized/organized_2015
+data/Resized/organized_2019
+data/Resized/preprocessed_2015
+data/Resized/preprocessed_2015_ben_color
+data/Resized/train_2015.csv
 .vscode/
 __pycache__/
 model.pth
+test.ipynb
+non_fed LR non-pretrained.ipynb
+non_fed LR pretrained.ipynb
