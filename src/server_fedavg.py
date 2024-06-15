@@ -4,9 +4,14 @@ from src.constants import LEARNING_RATE
 from src.model import Model_Retinopathy
 from src.server import Server
 from src.client_fedavg import Client_FedAVG
-from src.utils import get_loaders_fed, get_dataloader, split_for_federated
+from src.utils import (
+    get_loaders_fed,
+    get_dataloader,
+    split_for_federated,
+    split_non_iid,
+)
 
-from src.constants import K_CLIENTS, C
+from src.constants import K_CLIENTS, C, just_converge, iid
 
 import torch
 
@@ -19,8 +24,14 @@ class Server_FedAVG(Server):
         super(Server_FedAVG, self).__init__(
             n_clients, optimizer_fn, data_df, val_loader, lr
         )
-
-        train_df = split_for_federated(data_df, n_clients)
+        self.algorithm = "FedAvg"
+        ## Random split
+        if iid:
+            train_df = split_for_federated(data_df, n_clients)
+        else: # FOR NON IID:
+            train_df = split_non_iid(data_df)
+            self.n_clients = len(train_df)
+            self.clients_id = list(range(self.n_clients))
 
         self.clients = [
             Client_FedAVG(self, optimizer_fn, data, val_loader, lr) for data in train_df
@@ -52,7 +63,6 @@ class Server_FedAVG(Server):
 
     def aggregation(self, clients_id):
         s = sum([self.clients[i].get_data_len() for i in clients_id])
-        print(f"s=")
         new_weights = {}
         weights = self.get_weights()
         for key, layer in weights.items():
@@ -65,12 +75,12 @@ class Server_FedAVG(Server):
         self.set_weights(new_weights)
 
     def train_loop(self, rounds, epochs):
-        m_clients = int(max(1, K_CLIENTS * C))
+        m_clients = int(max(1, self.n_clients * C))
         if len(self.val_losses) == 0:
-            acc, loss = self.validate().values()
-            self.val_losses.append(loss)
-            self.val_accuracies.append(acc)
-            print(f"GLOBAL Loss = {loss}, Acc = {acc}")
+            val = self.validate()
+            self.append_val_metrics(val)
+            print(f"GLOBAL: {val}")
+        rounds_taken = None
         for r in range(rounds):
             print(f"Round {r}\n{dash*50}")
             selected_clients = np.random.choice(
@@ -80,13 +90,23 @@ class Server_FedAVG(Server):
 
             self.dispatch(selected_clients)
             self.client_update(selected_clients, epochs)
-            self.train_independent(selected_clients, epochs)
+            if not just_converge:
+                self.train_independent(selected_clients, epochs)
             self.aggregation(selected_clients)
-            acc, loss = self.validate().values()
-            self.val_losses.append(loss)
-            self.val_accuracies.append(acc)
-            self.marks.append(self.marks[-1] + epochs)
-            print(f"GLOBAL Loss = {loss}, Acc = {acc}")
-            self.save_plots()
+            val = self.validate()
+            self.epochs_trained += epochs
+            self.append_val_metrics(val)
+            print(f"GLOBAL: {val}")
+            rounds_taken = r + 1
+            acc = val["accuracy"]
+            recall = val["recall"]
+            precision = val["precision"]
+            f1 = val["f1"]
+            if not just_converge:
+                self.save_plots()
+            elif acc > 0.7 and recall > 0.9 and precision > 0.9 and f1 > 0.9:
+                print(f"DONE in {rounds_taken} rounds")
+                break
             gpu_memory = torch.cuda.memory_allocated()
             print(gpu_memory / (1024**2), "MB used")
+        self.print_results(rounds_taken, just_converge)
