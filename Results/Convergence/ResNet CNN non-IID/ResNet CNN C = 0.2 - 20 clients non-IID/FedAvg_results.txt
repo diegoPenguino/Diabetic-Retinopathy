@@ -1,0 +1,6 @@
+Results after 30 rounds:
+Global Model results:
+{'loss': 0.7971, 'accuracy': 0.7221, 'f1': 0.9415, 'accuracy_binary': 0.9428, 'recall': 0.9086, 'precision': 0.9769}
+
+
+TESTING:  {'loss': 0.7517, 'accuracy': 0.7236, 'f1': 0.9612, 'accuracy_binary': 0.9618, 'recall': 0.9319, 'precision': 0.9924}

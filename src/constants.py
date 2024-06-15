@@ -12,9 +12,9 @@ csv_file = f"data/Resized/train_{YEAR}.csv"
 optimizer_fn = torch.optim.SGD
 ## EXPERIMENT CONSTANTS
 just_converge = True
-iid = True
-model_arch = "CNN"
-C = 0.0
+iid = False
+model_arch = "ResNet"
+C = 1.0
 # model_arch = "ResNet"
 
 ## MODEL CONSTANTS
@@ -26,6 +26,8 @@ K_CLIENTS = 30 if iid else 20
 
 rounds = 1000 if just_converge else 50
 clients = list(range(K_CLIENTS))
+if not just_converge:
+    C = 1.0
 
 name = "Regular CNN" if model_arch == "CNN" else "ResNet CNN"
 iid_name = "IID" if iid else "non-IID"

@@ -1,0 +1,49 @@
+Results after 50 rounds:
+Global Model results:
+{'loss': 1.0287, 'accuracy': 0.6785, 'f1': 0.8137, 'accuracy_binary': 0.8365, 'recall': 0.7043, 'precision': 0.9632}
+
+
+Independent clients results:
+Client 0: {'loss': 4.4333, 'accuracy': 0.6785, 'f1': 0.8571, 'accuracy_binary': 0.8638, 'recall': 0.8065, 'precision': 0.9146}
+Client 1: {'loss': 3.01, 'accuracy': 0.6703, 'f1': 0.8877, 'accuracy_binary': 0.8828, 'recall': 0.914, 'precision': 0.8629}
+Client 2: {'loss': 6.2949, 'accuracy': 0.5041, 'f1': 0.8187, 'accuracy_binary': 0.8311, 'recall': 0.7527, 'precision': 0.8974}
+Client 3: {'loss': 5.7926, 'accuracy': 0.5313, 'f1': 0.8531, 'accuracy_binary': 0.8583, 'recall': 0.8118, 'precision': 0.8988}
+Client 4: {'loss': 5.8164, 'accuracy': 0.5204, 'f1': 0.8621, 'accuracy_binary': 0.8692, 'recall': 0.8065, 'precision': 0.9259}
+Client 5: {'loss': 3.0497, 'accuracy': 0.7112, 'f1': 0.8989, 'accuracy_binary': 0.9019, 'recall': 0.8602, 'precision': 0.9412}
+Client 6: {'loss': 8.8983, 'accuracy': 0.5014, 'f1': 0.8969, 'accuracy_binary': 0.8992, 'recall': 0.8656, 'precision': 0.9306}
+Client 7: {'loss': 3.7333, 'accuracy': 0.6757, 'f1': 0.8696, 'accuracy_binary': 0.8692, 'recall': 0.8602, 'precision': 0.8791}
+Client 8: {'loss': 7.8474, 'accuracy': 0.5259, 'f1': 0.8975, 'accuracy_binary': 0.8992, 'recall': 0.871, 'precision': 0.9257}
+Client 9: {'loss': 4.704, 'accuracy': 0.4796, 'f1': 0.8594, 'accuracy_binary': 0.8556, 'recall': 0.871, 'precision': 0.8482}
+Client 10: {'loss': 5.0004, 'accuracy': 0.6757, 'f1': 0.8982, 'accuracy_binary': 0.8937, 'recall': 0.9247, 'precision': 0.8731}
+Client 11: {'loss': 5.1549, 'accuracy': 0.6921, 'f1': 0.8638, 'accuracy_binary': 0.8719, 'recall': 0.8011, 'precision': 0.9371}
+Client 12: {'loss': 4.136, 'accuracy': 0.6866, 'f1': 0.8986, 'accuracy_binary': 0.8992, 'recall': 0.8817, 'precision': 0.9162}
+Client 13: {'loss': 5.3723, 'accuracy': 0.5395, 'f1': 0.8421, 'accuracy_binary': 0.8529, 'recall': 0.7742, 'precision': 0.9231}
+Client 14: {'loss': 2.8671, 'accuracy': 0.6812, 'f1': 0.8954, 'accuracy_binary': 0.8937, 'recall': 0.8978, 'precision': 0.893}
+Client 15: {'loss': 6.4804, 'accuracy': 0.4932, 'f1': 0.8767, 'accuracy_binary': 0.8774, 'recall': 0.8602, 'precision': 0.8939}
+Client 16: {'loss': 3.5849, 'accuracy': 0.6894, 'f1': 0.8852, 'accuracy_binary': 0.8883, 'recall': 0.8495, 'precision': 0.924}
+Client 17: {'loss': 5.0006, 'accuracy': 0.5232, 'f1': 0.8643, 'accuracy_binary': 0.8665, 'recall': 0.8387, 'precision': 0.8914}
+Client 18: {'loss': 4.8799, 'accuracy': 0.545, 'f1': 0.8062, 'accuracy_binary': 0.8283, 'recall': 0.7043, 'precision': 0.9424}
+Client 19: {'loss': 3.295, 'accuracy': 0.6621, 'f1': 0.8466, 'accuracy_binary': 0.8529, 'recall': 0.8011, 'precision': 0.8976}
+TESTING:  {'loss': 0.9455, 'accuracy': 0.6945, 'f1': 0.873, 'accuracy_binary': 0.8836, 'recall': 0.7885, 'precision': 0.9778}
+
+
+Client test 0: {'loss': 4.9292, 'accuracy': 0.6873, 'f1': 0.9007, 'accuracy_binary': 0.9018, 'recall': 0.8781, 'precision': 0.9245}
+Client test 1: {'loss': 3.2984, 'accuracy': 0.6691, 'f1': 0.8939, 'accuracy_binary': 0.8891, 'recall': 0.9211, 'precision': 0.8682}
+Client test 2: {'loss': 6.4172, 'accuracy': 0.5236, 'f1': 0.8794, 'accuracy_binary': 0.8818, 'recall': 0.8495, 'precision': 0.9115}
+Client test 3: {'loss': 5.8618, 'accuracy': 0.5309, 'f1': 0.8945, 'accuracy_binary': 0.8927, 'recall': 0.8961, 'precision': 0.8929}
+Client test 4: {'loss': 6.097, 'accuracy': 0.5382, 'f1': 0.8889, 'accuracy_binary': 0.8927, 'recall': 0.8459, 'precision': 0.9365}
+Client test 5: {'loss': 3.1879, 'accuracy': 0.6709, 'f1': 0.8845, 'accuracy_binary': 0.8836, 'recall': 0.8781, 'precision': 0.8909}
+Client test 6: {'loss': 9.4704, 'accuracy': 0.4982, 'f1': 0.8978, 'accuracy_binary': 0.8982, 'recall': 0.8817, 'precision': 0.9145}
+Client test 7: {'loss': 3.9607, 'accuracy': 0.6745, 'f1': 0.8929, 'accuracy_binary': 0.8909, 'recall': 0.8961, 'precision': 0.8897}
+Client test 8: {'loss': 8.185, 'accuracy': 0.5255, 'f1': 0.9081, 'accuracy_binary': 0.9073, 'recall': 0.9032, 'precision': 0.913}
+Client test 9: {'loss': 4.7985, 'accuracy': 0.5091, 'f1': 0.8801, 'accuracy_binary': 0.8782, 'recall': 0.8817, 'precision': 0.8786}
+Client test 10: {'loss': 5.3792, 'accuracy': 0.6727, 'f1': 0.9003, 'accuracy_binary': 0.8945, 'recall': 0.9391, 'precision': 0.8647}
+Client test 11: {'loss': 5.1256, 'accuracy': 0.7036, 'f1': 0.9121, 'accuracy_binary': 0.9145, 'recall': 0.8746, 'precision': 0.9531}
+Client test 12: {'loss': 4.1854, 'accuracy': 0.6873, 'f1': 0.9107, 'accuracy_binary': 0.9091, 'recall': 0.914, 'precision': 0.9075}
+Client test 13: {'loss': 5.3737, 'accuracy': 0.5545, 'f1': 0.9033, 'accuracy_binary': 0.9055, 'recall': 0.871, 'precision': 0.9382}
+Client test 14: {'loss': 2.8771, 'accuracy': 0.6818, 'f1': 0.9116, 'accuracy_binary': 0.9073, 'recall': 0.9427, 'precision': 0.8826}
+Client test 15: {'loss': 6.6452, 'accuracy': 0.4873, 'f1': 0.8921, 'accuracy_binary': 0.8909, 'recall': 0.8889, 'precision': 0.8953}
+Client test 16: {'loss': 3.8468, 'accuracy': 0.6909, 'f1': 0.9068, 'accuracy_binary': 0.9073, 'recall': 0.8889, 'precision': 0.9254}
+Client test 17: {'loss': 5.0494, 'accuracy': 0.5473, 'f1': 0.8967, 'accuracy_binary': 0.8982, 'recall': 0.871, 'precision': 0.924}
+Client test 18: {'loss': 5.0842, 'accuracy': 0.56, 'f1': 0.876, 'accuracy_binary': 0.8836, 'recall': 0.81, 'precision': 0.9536}
+Client test 19: {'loss': 3.5908, 'accuracy': 0.6927, 'f1': 0.9007, 'accuracy_binary': 0.9018, 'recall': 0.8781, 'precision': 0.9245}

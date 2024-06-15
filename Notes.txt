@@ -1,3 +1,0 @@
-- Test C = 1, E = 5, B = 16, with more than 30 rounds IMPORTANT
-
-- Run scaffold C = 1, E = 5, b = 16 only for 5 rounds to see how convergence works better on scaffold
