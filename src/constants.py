@@ -13,7 +13,7 @@ optimizer_fn = torch.optim.SGD
 ## EXPERIMENT CONSTANTS
 just_converge = False
 iid = False
-model_arch = "CNN"
+model_arch = "ResNet"
 C = 1.0
 # model_arch = "ResNet"
 
