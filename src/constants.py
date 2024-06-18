@@ -8,7 +8,7 @@ ext = "png" if YEAR == 2019 else "jpeg"
 
 directory = f"data/Resized/preprocessed_{YEAR}_ben_color"
 csv_file = f"data/Resized/train_{YEAR}.csv"
-
+# All good
 optimizer_fn = torch.optim.SGD
 ## EXPERIMENT CONSTANTS
 just_converge = False
