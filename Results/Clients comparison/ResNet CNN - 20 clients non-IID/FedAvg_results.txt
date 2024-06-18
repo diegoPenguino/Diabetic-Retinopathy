@@ -43,7 +43,7 @@ Client test 12: {'loss': 2.0332, 'accuracy': 0.7327, 'f1': 0.9564, 'accuracy_bin
 Client test 13: {'loss': 3.5083, 'accuracy': 0.5673, 'f1': 0.951, 'accuracy_binary': 0.9509, 'recall': 0.9391, 'precision': 0.9632}
 Client test 14: {'loss': 2.2818, 'accuracy': 0.7073, 'f1': 0.9373, 'accuracy_binary': 0.9345, 'recall': 0.9642, 'precision': 0.9119}
 Client test 15: {'loss': 3.3738, 'accuracy': 0.54, 'f1': 0.9396, 'accuracy_binary': 0.9418, 'recall': 0.8925, 'precision': 0.992}
-Client test 16: {'loss': 2.1087, 'accuracy': 0.7345, 'f1': 0.958, 'accuracy_binary': 0.9582, 'recall': 0.9391, 'precision': 0.9776}
+Client test 16: {'loss': 2.1087, 'accuracy': 0.7345, 'f1': 0.9421, 'accuracy_binary': 0.9422, 'recall': 0.9091, 'precision': 0.9776}
 Client test 17: {'loss': 3.3092, 'accuracy': 0.56, 'f1': 0.9287, 'accuracy_binary': 0.9291, 'recall': 0.9104, 'precision': 0.9478}
 Client test 18: {'loss': 3.4869, 'accuracy': 0.5673, 'f1': 0.9455, 'accuracy_binary': 0.9455, 'recall': 0.9319, 'precision': 0.9594}
 Client test 19: {'loss': 2.1407, 'accuracy': 0.7291, 'f1': 0.9553, 'accuracy_binary': 0.9545, 'recall': 0.957, 'precision': 0.9536}

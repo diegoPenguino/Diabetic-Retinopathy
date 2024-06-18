@@ -17,44 +17,50 @@ class Client_FedAVG(Model_Retinopathy):
     def plot_loss(self, ax, add_label=False):
         marks, val_losses = zip(*self.val_losses)
         if add_label:
-            ax.plot(marks, val_losses, "--", color="green", label="Clients")
+            ax.plot(marks, val_losses, "--", color="green", label="Clients", alpha=0.6)
             return
-        ax.plot(marks, val_losses, "--", color="green")
+        ax.plot(marks, val_losses, "--", color="green", alpha=0.6)
 
     def plot_accuracy(self, ax, add_label=False):
         marks, val_accuracies = zip(*self.val_accuracies)
         if add_label:
-            ax.plot(marks, val_accuracies, "--", color="green", label="Clients")
+            ax.plot(
+                marks, val_accuracies, "--", color="green", label="Clients", alpha=0.6
+            )
             return
-        ax.plot(marks, val_accuracies, "--", color="green")
+        ax.plot(marks, val_accuracies, "--", color="green", alpha=0.6)
 
     def plot_recall(self, ax, add_label=False):
         marks, val_recall = zip(*self.val_recall)
         if add_label:
-            ax.plot(marks, val_recall, "--", color="green", label="Clients")
+            ax.plot(marks, val_recall, "--", color="green", label="Clients", alpha=0.6)
             return
-        ax.plot(marks, val_recall, "--", color="green")
+        ax.plot(marks, val_recall, "--", color="green", alpha=0.6)
 
     def plot_precision(self, ax, add_label=False):
         marks, val_precision = zip(*self.val_precision)
         if add_label:
-            ax.plot(marks, val_precision, "--", color="green", label="Clients")
+            ax.plot(
+                marks, val_precision, "--", color="green", label="Clients", alpha=0.6
+            )
             return
-        ax.plot(marks, val_precision, "--", color="green")
+        ax.plot(marks, val_precision, "--", color="green", alpha=0.6)
 
     def plot_f1(self, ax, add_label=False):
         marks, val_f1 = zip(*self.val_f1)
         if add_label:
-            ax.plot(marks, val_f1, "--", color="green", label="Clients")
+            ax.plot(marks, val_f1, "--", color="green", label="Clients", alpha=0.6)
             return
-        ax.plot(marks, val_f1, "--", color="green")
+        ax.plot(marks, val_f1, "--", color="green", alpha=0.6)
 
     def plot_bin_accuracy(self, ax, add_label=False):
         marks, val_bin_accuracy = zip(*self.val_bin_accuracy)
         if add_label:
-            ax.plot(marks, val_bin_accuracy, "--", color="green", label="Clients")
+            ax.plot(
+                marks, val_bin_accuracy, "--", color="green", label="Clients", alpha=0.6
+            )
             return
-        ax.plot(marks, val_bin_accuracy, "--", color="green")
+        ax.plot(marks, val_bin_accuracy, "--", color="green", alpha=0.6)
 
     def append_val_metrics(self, val):
         self.val_losses.append((self.epochs_trained, val["loss"]))

@@ -64,13 +64,6 @@ def get_resnet18():
     return model
 
 
-def get_vgg19():
-    model = torchvision.models.vgg19(weights="DEFAULT")
-    freeze_model(model)
-    model.classifier.add_module("final", nn.Linear(1000, 5))
-    return model
-
-
 class Model_Retinopathy(nn.Module):
     def __init__(self, optimizer_fn, train_df, val_loader, lr=LEARNING_RATE):
         super(Model_Retinopathy, self).__init__()
@@ -163,9 +156,10 @@ class Model_Retinopathy(nn.Module):
                 linestyle="-",
                 color="red",
                 label="Ind. Clients",
+                alpha=0.6,
             )
             return
-        ax.plot(self.marks, self.val_losses, linestyle="-", color="red")
+        ax.plot(self.marks, self.val_losses, linestyle="-", color="red", alpha=0.6)
 
     def plot_val_accuracy(self, ax, add_label=False):
         if add_label:
@@ -175,9 +169,10 @@ class Model_Retinopathy(nn.Module):
                 linestyle="-",
                 color="red",
                 label="Ind. Clients",
+                alpha=0.6,
             )
             return
-        ax.plot(self.marks, self.val_accuracies, linestyle="-", color="red")
+        ax.plot(self.marks, self.val_accuracies, linestyle="-", color="red", alpha=0.6)
 
     def plot_val_recall(self, ax, add_label=False):
         if add_label:
@@ -187,9 +182,10 @@ class Model_Retinopathy(nn.Module):
                 linestyle="-",
                 color="red",
                 label="Ind. Clients",
+                alpha=0.6,
             )
             return
-        ax.plot(self.marks, self.val_recall, linestyle="-", color="red")
+        ax.plot(self.marks, self.val_recall, linestyle="-", color="red", alpha=0.6)
 
     def plot_val_precision(self, ax, add_label=False):
         if add_label:
@@ -199,9 +195,10 @@ class Model_Retinopathy(nn.Module):
                 linestyle="-",
                 color="red",
                 label="Ind. Clients",
+                alpha=0.6,
             )
             return
-        ax.plot(self.marks, self.val_precision, linestyle="-", color="red")
+        ax.plot(self.marks, self.val_precision, linestyle="-", color="red", alpha=0.6)
 
     def plot_val_f1(self, ax, add_label=False):
         if add_label:
@@ -211,9 +208,10 @@ class Model_Retinopathy(nn.Module):
                 linestyle="-",
                 color="red",
                 label="Ind. Clients",
+                alpha=0.6,
             )
             return
-        ax.plot(self.marks, self.val_f1, linestyle="-", color="red")
+        ax.plot(self.marks, self.val_f1, linestyle="-", color="red", alpha=0.6)
 
     def plot_val_bin_accuracy(self, ax, add_label=False):
         if add_label:
@@ -223,9 +221,12 @@ class Model_Retinopathy(nn.Module):
                 linestyle="-",
                 color="red",
                 label="Ind. Clients",
+                alpha=0.6,
             )
             return
-        ax.plot(self.marks, self.val_bin_accuracy, linestyle="-", color="red")
+        ax.plot(
+            self.marks, self.val_bin_accuracy, linestyle="-", color="red", alpha=0.6
+        )
 
     def check_loader(self, loader):
         if loader is None:

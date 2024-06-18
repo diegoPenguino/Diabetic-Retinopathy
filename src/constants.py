@@ -11,9 +11,9 @@ csv_file = f"data/Resized/train_{YEAR}.csv"
 
 optimizer_fn = torch.optim.SGD
 ## EXPERIMENT CONSTANTS
-just_converge = True
+just_converge = False
 iid = False
-model_arch = "ResNet"
+model_arch = "CNN"
 C = 1.0
 # model_arch = "ResNet"
 
